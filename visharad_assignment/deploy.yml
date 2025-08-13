@@ -1,0 +1,51 @@
+name: Train and Deploy
+on:
+  push:
+    paths:
+      - 'src/**'
+      - 'components/**'
+      - 'pipelines/**'
+      - 'deployment/**'
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+        
+    - name: Install Azure ML CLI
+      run: |
+        pip install azure-cli
+        az extension add -n ml -y
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        
+    - name: Install dependencies
+      run: pip install azure-ai-ml azure-identity "requirements.txt"
+      
+    - name: create enviornment
+      run: |
+        az ml environment create --file environment.yml --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --workspace-name ${{ secrets.AZURE_WORKSPACE_NAME }}
+
+      
+    - name: Submit Training Pipeline
+      run: |
+        az ml job create --file pipelines/train_pipeline.yml --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --workspace-name ${{ secrets.AZURE_WORKSPACE_NAME }}
+
+    - name: Submit Drift Detection Pipeline
+      run: |
+        az ml job create --file pipelines/drift_pipeline.yml --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --workspace-name ${{ secrets.AZURE_WORKSPACE_NAME }}
+    
+    - name: Scheduler Python Script
+      run: python ./src/schedule_pipeline.py
