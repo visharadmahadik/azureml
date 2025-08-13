@@ -1,0 +1,10 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+experiment_name: model-deployment
+description: Deploy trained model to endpoint
+
+jobs:
+  deploy_job:
+    type: command
+    component: file:../components/deploy_component.yml
+    compute: azureml:cpu-cluster

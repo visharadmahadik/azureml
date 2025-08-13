@@ -1,0 +1,25 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+experiment_name: training-pipeline
+description: rains model from blob data
+
+inputs:
+  input_data:
+    type: uri_file
+    path: azureml://datastores/workspaceblobstore/paths/train-data/input-data.csv
+
+outputs:
+  model_output:
+    type: uri_folder
+    mode: upload
+
+jobs:
+  train_job:
+    type: command
+    component: file:../components/train_component.yml
+    environment: azureml:sklearn-env:1
+    compute: azureml:cpu-cluster
+    inputs:
+      input_data: ${{parent.inputs.input_data}}
+    outputs:
+      model_output: ${{parent.outputs.model_output}}

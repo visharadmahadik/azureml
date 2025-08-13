@@ -1,0 +1,7 @@
+name: deploy_model
+version: 1
+type: command
+code: ./deployment
+command: >-
+  python deploy_model.py
+environment: azureml:sklearn-env:1

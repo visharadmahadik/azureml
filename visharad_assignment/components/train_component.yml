@@ -1,0 +1,13 @@
+name: train_model
+version: 1
+type: command
+inputs:
+  input_data: 
+    type: uri_file
+outputs:
+  model_output:
+    type: uri_folder
+code: ./src
+command: >-
+  python train.py --input_data ${{inputs.input_data}} --model_output ${{outputs.model_output}}
+environment: azureml:sklearn-env:1

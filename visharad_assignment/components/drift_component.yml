@@ -1,0 +1,15 @@
+drift_componentname: drift_monitor
+version: 1
+type: command
+inputs:
+  old_data:
+    type: uri_file
+  new_data:
+    type: uri_file
+outputs:
+  report_output:
+    type: uri_folder
+code: ./src
+command: >-
+  python drift_monitor.py --old_data ${{inputs.old_data}} --new_data ${{inputs.new_data}} --report_output ${{outputs.report_output}}
+environment: azureml:sklearn-env:1

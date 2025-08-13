@@ -1,0 +1,29 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+experiment_name: drift-monitoring
+description: Detects data drift between historical and new datasets
+
+inputs:
+  old_data:
+    type: uri_file
+    path: azureml://datastores/workspaceblobstore/paths/train-data/input.csv
+  new_data:
+    type: uri_file
+    path: azureml://datastores/workspaceblobstore/paths/new-data/input.csv
+
+outputs:
+  report_output:
+    type: uri_folder
+    mode: upload
+
+jobs:
+  drift_job:
+    type: command
+    component: file:../components/drift_component.yml
+    environment: azureml:sklearn-env:1
+    compute: azureml:cpu-cluster
+    inputs:
+      old_data: ${{parent.inputs.old_data}}
+      new_data: ${{parent.inputs.new_data}}
+    outputs:
+      report_output: ${{parent.outputs.report_output}}
